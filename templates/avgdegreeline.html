@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>ECharts</title>
+<!--引入 jquery.js-->
+<script type="text/javascript" src="http://libs.baidu.com/jquery/1.7.2/jquery.min.js"></script>
+<!-- 引入 echarts.js -->
+<!--<script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/echarts-all-3.js"></script>-->
+<script type="text/javascript" src="js/echarts.js"></script>
+</head>
+
+<body>
+<!-- 为ECharts准备一个具备大小（宽高）的Dom -->
+<div id="main" style="width: 600px;height:400px;"></div>
+<script type="text/javascript">
+    var myChart = echarts.init(document.getElementById('main'));
+    // 显示标题，图例和空的坐标轴
+    myChart.setOption({
+        title: {
+            text: '广州市历年平均气温'
+        },
+        tooltip: {},
+        legend: {
+            data:['平均气温']
+        },
+        xAxis: {
+            type: 'category',
+            data: []
+        },
+        yAxis: {},
+        series: [{
+            name: '平均气温',
+            type: 'bar',
+            data: []
+        }]
+    });
+    myChart.showLoading();    //数据加载完之前先显示一段简单的loading动画
+    $.ajax({
+        type : "post",
+        async : true,            //异步请求（同步请求将会锁住浏览器，用户其他操作必须等待请求完成才可以执行）
+        url : "avgdegree",    //请求发送到TestServlet处
+        data : {},
+        dataType : "json",        //返回数据形式为json
+        success : function(result) {
+            //请求成功时执行该函数内容，result即为服务器返回的json对象
+            if (result) {
+                myChart.hideLoading();    //隐藏加载动画
+                myChart.setOption({        //加载数据图表
+                    xAxis: {
+                        data: result.x
+                    },
+                    series: [{
+                        // 根据名字对应到相应的系列
+                        name: '平均气温',
+                        data: result.y,
+                        type: 'line'
+                    }]
+                });
+
+            }
+        },
+        error : function(errorMsg) {
+            //请求失败时执行该函数
+            alert("图表请求数据失败!");
+            myChart.hideLoading();
+        }
+    })
+</script>
+</body>
+</html>
